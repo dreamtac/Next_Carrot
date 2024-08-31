@@ -6,23 +6,20 @@ export default function Home() {
         >
             <div
                 className="bg-white w-full max-w-screen-sm shadow-lg p-5 rounded-3xl
-            flex flex-col gap-2 justify-between md:flex-row"
+            flex flex-col gap-3"
             >
-                <input
-                    type="email"
-                    placeholder="Email"
-                    className="w-full bg-gray-200 h-10 rounded-full pl-5 ring-2 focus:ring-blue-200
-                invalid:bg-red-100 invalid:focus:ring-red-500 outline-none peer"
-                    required
-                />
-                <span className="text-red-500 text-sm hidden peer-invalid:block">Email is required.</span>
-                <button
-                    className="text-white rounded-xl py-1.5 
-                active:scale-95 active:bg-blue-600 transition-transform font-semibold md:p-2
-                bg-gradient-to-tr from-cyan-500 to-purple-300 peer-invalid:from-yellow-600 peer-invalid:to-red-400"
-                >
-                    Login
-                </button>
+                {['프리덤', '마르니', '달곰이', '끙혀'].map((user, index) => (
+                    <div key={index} className="flex items-center gap-5">
+                        <div className="bg-blue-400 size-10 rounded-full" />
+                        <span className="text-lg font-medium">{user}</span>
+                        <div
+                            className="bg-red-500 size-6 rounded-full text-white flex items-center justify-center
+                        animate-bounce"
+                        >
+                            <span>{index}</span>
+                        </div>
+                    </div>
+                ))}
             </div>
         </main>
     );
