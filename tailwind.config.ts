@@ -7,6 +7,11 @@ const config: Config = {
         './app/**/*.{js,ts,jsx,tsx,mdx}',
     ],
     theme: {
+        extend: {
+            borderRadius: {
+                '11px': '11.11px',
+            },
+        },
         // extend: {
         //   backgroundImage: {
         //     "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
@@ -15,6 +20,6 @@ const config: Config = {
         //   },
         // },
     },
-    plugins: [],
+    plugins: [require('@tailwindcss/forms'), require('daisyui')],
 };
 export default config;
