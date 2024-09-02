@@ -1,3 +1,5 @@
+import FormBtn from '@/components/form_btn';
+import FormInput from '@/components/form_input';
 import { ChatBubbleLeftEllipsisIcon } from '@heroicons/react/20/solid';
 import Link from 'next/link';
 
@@ -9,19 +11,11 @@ export default function create_account() {
                 <h2 className="text-xl">아래 입력칸에 이름을 입력해주세요!</h2>
             </div>
             <form className="flex flex-col gap-3">
-                <div className="flex flex-col gap-2">
-                    <input
-                        className="bg-transparent rounded-md w-full h-10 focus:outline-none 
-                        ring-1 focus:ring-2 ring-neutral-200 focus:ring-orange-500 border-none placeholder:text-gray-400 peer"
-                        type="text"
-                        placeholder="이름"
-                        required
-                    />
-                    <span className="text-red-500 font-medium hidden peer-invalid:block">
-                        이름을 다시 입력해주세요.
-                    </span>
-                </div>
-                <button className="custom-btn h-10">회원가입</button>
+                <FormInput required type="text" placeholder="이름" errors={['이름을 정확히 입력해주세요.']} />
+                <FormInput required type="email" placeholder="이메일" errors={['이메일을 정확히 입력해주세요.']} />
+                <FormInput required type="password" placeholder="비밀번호" errors={[]} />
+                <FormInput required type="password" placeholder="비밀번호 확인" errors={[]} />
+                <FormBtn content="회원가입" loading={true} />
             </form>
             <div className="w-full h-px bg-neutral-500" />
             <div>
