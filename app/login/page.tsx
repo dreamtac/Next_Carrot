@@ -30,7 +30,6 @@ export default function LogIn() {
                     minLength={PASSWORD_MIN_LENGTH}
                     maxLength={PASSWORD_MAX_LENGTH}
                     errors={state?.fieldErrors.password}
-                    // errors={state?.fieldErrors}
                 />
                 <Button content="로그인" />
             </form>
