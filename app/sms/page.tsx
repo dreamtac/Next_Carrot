@@ -21,7 +21,15 @@ export default function SMSLogin() {
                 {state.token ? null : (
                     <Input name="number" required type="text" placeholder="전화번호" errors={state.error?.formErrors} />
                 )}
-                {state.token ? <Input name="token" required type="number" placeholder="인증번호" /> : null}
+                {state.token ? (
+                    <Input
+                        name="token"
+                        required
+                        type="number"
+                        placeholder="인증번호"
+                        errors={state.error?.formErrors}
+                    />
+                ) : null}
                 <Button content={state.token ? '인증하기' : '인증번호 요청'} />
             </form>
         </div>
