@@ -14,6 +14,6 @@ async function test() {
     console.log(token);
 }
 
-test();
+// test();
 
 export default db;
