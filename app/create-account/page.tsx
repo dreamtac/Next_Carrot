@@ -19,7 +19,7 @@ export default function CreateAccount() {
                     name="username"
                     required
                     type="text"
-                    placeholder="이름"
+                    placeholder="ID"
                     minLength={2}
                     maxLength={15}
                     errors={state?.fieldErrors.username}

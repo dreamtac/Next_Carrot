@@ -10,6 +10,7 @@ import {
     PASSWORD_REGEX,
 } from '@/lib/constants';
 import db from '@/lib/db';
+import bcrypt from 'bcrypt';
 import { z } from 'zod';
 
 // const usernameSchema = z.string().min(5).max(15);
@@ -97,7 +98,20 @@ export async function createAcoount(prevState: any, formData: FormData) {
         // username 중복체크
         // email 중복체크
         // 비밀번호 해싱
+        const hashedPassword = await bcrypt.hash(result.data.password, 12);
+        console.log(hashedPassword);
         // 유저 정보 db저장(가입)
+        const user = await db.user.create({
+            data: {
+                username: result.data.username,
+                email: result.data.email,
+                password: hashedPassword,
+            },
+            select: {
+                id: true,
+            },
+        });
+        console.log(user);
         // 유저 로그인
         // 홈(/home) 리다이렉트
     }
