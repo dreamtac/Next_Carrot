@@ -11,6 +11,9 @@ import {
 } from '@/lib/constants';
 import db from '@/lib/db';
 import bcrypt from 'bcrypt';
+import { getIronSession } from 'iron-session';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
 // const usernameSchema = z.string().min(5).max(15);
@@ -95,11 +98,13 @@ export async function createAcoount(prevState: any, formData: FormData) {
     if (!result.success) {
         return result.error.flatten();
     } else {
-        // username 중복체크
-        // email 중복체크
+        // username 중복체크 (상단 checkUniqueUsername 함수와 zod의 refine을 결합)
+        // email 중복체크 (상단 checkUniqueEmail 함수와 zod의 refine을 결합)
+
         // 비밀번호 해싱
         const hashedPassword = await bcrypt.hash(result.data.password, 12);
-        console.log(hashedPassword);
+        // console.log(hashedPassword);
+
         // 유저 정보 db저장(가입)
         const user = await db.user.create({
             data: {
@@ -111,8 +116,19 @@ export async function createAcoount(prevState: any, formData: FormData) {
                 id: true,
             },
         });
-        console.log(user);
-        // 유저 로그인
+        // console.log(user);
+
+        // 유저 로그인 (해당 유저의 브라우저에 쿠키를 보냄)
+        const cookie = await getIronSession(cookies(), {
+            //Iron Session이 쿠키를 가져옴, 만약 쿠키가 존재하지 않는다면 생성.
+            cookieName: 'Carrot-Cookie', //쿠키의 이름은 Carrot-Cookie
+            password: process.env.COOKIE_PASSWORD!, //쿠키 암호화에 사용할 비밀번호. (해싱은 단방향이므로 사용못함 쿠키는 다시 해석해야 하므로 양방향 암호화가 필요)
+        });
+        //@ts-ignore
+        cookie.id = user.id; //쿠키에 담을 정보 (이 데이터가 암호화됨.)
+        await cookie.save(); //쿠키 저장
+
         // 홈(/home) 리다이렉트
+        redirect('/profile');
     }
 }
