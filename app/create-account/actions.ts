@@ -10,9 +10,8 @@ import {
     PASSWORD_REGEX,
 } from '@/lib/constants';
 import db from '@/lib/db';
+import getSession from '@/lib/session';
 import bcrypt from 'bcrypt';
-import { getIronSession } from 'iron-session';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 
@@ -119,14 +118,9 @@ export async function createAcoount(prevState: any, formData: FormData) {
         // console.log(user);
 
         // 유저 로그인 (해당 유저의 브라우저에 쿠키를 보냄)
-        const cookie = await getIronSession(cookies(), {
-            //Iron Session이 쿠키를 가져옴, 만약 쿠키가 존재하지 않는다면 생성.
-            cookieName: 'Carrot-Cookie', //쿠키의 이름은 Carrot-Cookie
-            password: process.env.COOKIE_PASSWORD!, //쿠키 암호화에 사용할 비밀번호. (해싱은 단방향이므로 사용못함 쿠키는 다시 해석해야 하므로 양방향 암호화가 필요)
-        });
-        //@ts-ignore
-        cookie.id = user.id; //쿠키에 담을 정보 (이 데이터가 암호화됨.)
-        await cookie.save(); //쿠키 저장
+        const session = await getSession();
+        session.id = user.id; //쿠키에 담을 정보 (이 데이터가 암호화됨.)
+        await session.save(); //쿠키 저장
 
         // 홈(/home) 리다이렉트
         redirect('/profile');
