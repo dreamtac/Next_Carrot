@@ -62,6 +62,7 @@ export async function login(prevState: any, formData: FormData) {
             //비밀번호 일치
             const session = await getSession();
             session.id = user!.id;
+            session.save();
             redirect('/profile');
         } else {
             //비밀번호 불일치
