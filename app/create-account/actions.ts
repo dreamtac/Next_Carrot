@@ -133,7 +133,6 @@ export async function createAcoount(prevState: any, formData: FormData) {
     const result = await formSchema.safeParseAsync(data);
 
     if (!result.success) {
-        console.log(result.error.flatten());
         return result.error.flatten();
     } else {
         // username 중복체크 (상단 checkUniqueUsername 함수와 zod의 refine을 결합, superRefine으로 변경)
