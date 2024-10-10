@@ -1,6 +1,6 @@
 import db from '@/lib/db';
 import getSession from '@/lib/session';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
 
     const user = await db.user.findUnique({
         where: {
-            github_id: id,
+            github_id: id.toString(),
         },
         select: {
             id: true,
@@ -57,13 +57,13 @@ export async function GET(request: NextRequest) {
         const session = await getSession();
         session.id = user.id;
         await session.save();
-        return NextResponse.redirect('/profile');
+        return redirect('/profile');
     } else {
         //해당 깃허브 아이디가 없음 (회원가입 필요 (DB정보 입력))
         const newUser = await db.user.create({
             data: {
-                github_id: id,
-                username: login,
+                github_id: id.toString(),
+                username: `${login}_GH`,
                 avatar: avatar_url,
             },
             select: {
@@ -73,6 +73,6 @@ export async function GET(request: NextRequest) {
         const session = await getSession();
         session.id = newUser.id;
         await session.save();
-        return NextResponse.redirect('/profile');
+        return redirect('/profile');
     }
 }

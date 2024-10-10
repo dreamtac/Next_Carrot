@@ -52,6 +52,11 @@ const checkUsername = (username: string) => {
     return !username.includes('fxxk');
 };
 
+const checkUsernameSpecialChar = (username: string) => {
+    const regex = /^[a-zA-Z0-9]+$/;
+    return regex.test(username);
+};
+
 const checkPassword = ({ password, confirm_password }: { password: string; confirm_password: string }) =>
     password === confirm_password;
 
@@ -66,7 +71,8 @@ const formSchema = z
             .max(15, '유저 네임은 최대 15자를 초과할 수 없습니다.')
             .trim()
             .toLowerCase()
-            .refine(checkUsername, '부적절한 문자가 포함되어 있습니다.'),
+            .refine(checkUsername, '부적절한 문자가 포함되어 있습니다.')
+            .refine(checkUsernameSpecialChar, '특수문자는 사용할 수 없습니다.'),
         // .refine(checkUniqueUsername, '이미 해당 username이 존재합니다.'),
         email: z.string({ required_error: ERROR_REQUIRED }).email('이메일 양식을 입력해주세요.'),
         // .refine(checkUniqueEmail, '해당 이메일이 이미 존재합니다.'),
