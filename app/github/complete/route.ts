@@ -1,6 +1,6 @@
 import db from '@/lib/db';
-import getSession from '@/lib/session';
-import { notFound, redirect } from 'next/navigation';
+import { getSession, sessionLogin } from '@/lib/session';
+import { redirect } from 'next/navigation';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
 
     if (!code) {
         //code가 없을 떄
-        return notFound();
+        return new NextResponse(null, { status: 400 });
     }
 
     //받은 code로 다시 POST 요청을 보내고, 엑세스 토큰 (access_token)을 받아옴.
@@ -70,9 +70,10 @@ export async function GET(request: NextRequest) {
                 id: true,
             },
         });
-        const session = await getSession();
-        session.id = newUser.id;
-        await session.save();
+        await sessionLogin(newUser.id);
+        // const session = await getSession();
+        // session.id = newUser.id;
+        // await session.save();
         return redirect('/profile');
     }
 }
