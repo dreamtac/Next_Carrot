@@ -9,7 +9,7 @@ import {
     PASSWORD_REGEX,
 } from '@/lib/constants';
 import db from '@/lib/db';
-import { getSession } from '@/lib/session';
+import { sessionLogin } from '@/lib/session';
 import bcrypt from 'bcrypt';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
@@ -60,9 +60,7 @@ export async function login(prevState: any, formData: FormData) {
         const ok = await bcrypt.compare(result.data.password, user!.password ?? '');
         if (ok) {
             //비밀번호 일치
-            const session = await getSession();
-            session.id = user!.id;
-            await session.save();
+            await sessionLogin(user!.id);
             redirect('/profile');
         } else {
             //비밀번호 불일치
