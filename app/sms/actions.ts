@@ -1,5 +1,7 @@
 'use server';
 
+import db from '@/lib/db';
+import crypto from 'crypto';
 import { redirect } from 'next/navigation';
 import validator from 'validator';
 import { z } from 'zod';
@@ -13,6 +15,23 @@ const tokenSchema = z.coerce.number().min(100000).max(999999);
 
 interface ActionState {
     token: boolean;
+}
+
+async function getToken() {
+    const token = crypto.randomInt(100000, 999999).toString();
+    const exists = await db.sMSToken.findUnique({
+        where: {
+            token: token,
+        },
+        select: {
+            id: true,
+        },
+    });
+    if (exists) {
+        return getToken();
+    } else {
+        return token;
+    }
 }
 
 export async function smsLogin(prevState: ActionState, formData: FormData) {
@@ -30,6 +49,33 @@ export async function smsLogin(prevState: ActionState, formData: FormData) {
             };
         } else {
             //적절한 전화번호를 넣었을 때
+            // 1. 이전 토큰 삭제하기
+            await db.sMSToken.deleteMany({
+                where: {
+                    user: {
+                        phone: result.data,
+                    },
+                },
+            });
+            // 2. 새 토큰 생성
+            const token = await getToken();
+            await db.sMSToken.create({
+                data: {
+                    token: token,
+                    user: {
+                        connectOrCreate: {
+                            where: {
+                                phone: result.data,
+                            },
+                            create: {
+                                username: crypto.randomBytes(10).toString('hex'),
+                                phone: result.data,
+                            },
+                        },
+                    },
+                },
+            });
+            // 3. 유저에게 토큰 전송 (sms)
             return {
                 token: true,
             };
