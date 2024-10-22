@@ -1,8 +1,10 @@
 'use server';
 
 import db from '@/lib/db';
+import { sessionLogin } from '@/lib/session';
 import crypto from 'crypto';
 import { redirect } from 'next/navigation';
+import twilio from 'twilio';
 import validator from 'validator';
 import { z } from 'zod';
 
@@ -11,7 +13,23 @@ const phoneSchema = z
     .trim()
     .refine(number => validator.isMobilePhone(number, 'ko-KR'), '잘못된 전화번호입니다.');
 
-const tokenSchema = z.coerce.number().min(100000).max(999999);
+async function tokenExists(token: number) {
+    const exists = await db.sMSToken.findUnique({
+        where: {
+            token: token.toString(),
+        },
+        select: {
+            id: true,
+        },
+    });
+    if (exists) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+const tokenSchema = z.coerce.number().min(100000).max(999999).refine(tokenExists, '코드가 일치하지 않습니다.');
 
 interface ActionState {
     token: boolean;
@@ -75,6 +93,12 @@ export async function smsLogin(prevState: ActionState, formData: FormData) {
                     },
                 },
             });
+            const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
+            await client.messages.create({
+                body: `캐럿마켓 인증 번호는 ${token} 입니다.`,
+                from: process.env.TWILIO_PHONE_NUMBER,
+                to: process.env.MY_PHONE_NUMBER!,
+            });
             // 3. 유저에게 토큰 전송 (sms)
             return {
                 token: true,
@@ -82,7 +106,7 @@ export async function smsLogin(prevState: ActionState, formData: FormData) {
         }
     } else {
         //token = true일 때 (전화번호를 입력하고, 인증 문자를 받은 상황)
-        const result = tokenSchema.safeParse(token);
+        const result = await tokenSchema.safeParseAsync(token);
         if (!result.success) {
             console.log(result.error.flatten());
             //토큰이 일치하지 않을 때
@@ -92,7 +116,28 @@ export async function smsLogin(prevState: ActionState, formData: FormData) {
             };
         } else {
             //토큰이 정확히 일치할 때
-            redirect('/home');
+            // 해당 토큰의 userId 가져오기
+            const token = await db.sMSToken.findUnique({
+                where: {
+                    token: result.data.toString(),
+                },
+                select: {
+                    id: true,
+                    userId: true,
+                },
+            });
+
+            // 유저 로그인
+            if (token) {
+                await sessionLogin(token.userId);
+                //사용한 토큰 지우기
+                await db.sMSToken.delete({
+                    where: {
+                        id: token.id,
+                    },
+                });
+            }
+            redirect('/profile');
         }
     }
 }
