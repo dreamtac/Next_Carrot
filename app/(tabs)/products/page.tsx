@@ -1,7 +1,7 @@
-import ProductList from '@/components/product-list';
+import InfinityProductList from '@/components/product-infinite-list';
 import db from '@/lib/db';
 
-async function getProducts() {
+async function getInitialProducts() {
     const products = await db.product.findMany({
         select: {
             title: true,
@@ -10,20 +10,19 @@ async function getProducts() {
             created_at: true,
             price: true,
         },
+        take: 1,
+        orderBy: {
+            created_at: 'desc',
+        },
     });
     return products;
 }
 
 export default async function Products() {
-    const products = await getProducts();
+    const initialProducts = await getInitialProducts();
     return (
-        <div>
-            <h1 className="text-white text-4xl">Products!</h1>
-            <div className="flex flex-col p-5 gap-5">
-                {products.map(product => {
-                    return <ProductList key={product.id} {...product} />;
-                })}
-            </div>
+        <div className="flex flex-col p-5 gap-5">
+            <InfinityProductList initialProducts={initialProducts} />
         </div>
     );
 }

@@ -60,12 +60,12 @@ export default async function ProductDetail({ params }: { params: { id: string }
     return (
         <div>
             <div className="relative aspect-square">
-                <Image fill src={product.photo} alt={product.title} />
+                <Image fill src={product.photo} alt={product.title} className="object-cover" />
             </div>
             <div className="flex p-5 items-center gap-3 border-b border-neutral-600">
                 <div className="relative size-10 rounded-full overflow-hidden">
                     {product.user.avatar !== null ? (
-                        <Image src={product.user.avatar} alt={product.user.username} fill />
+                        <Image src={product.user.avatar} alt={product.user.username} fill unoptimized />
                     ) : (
                         <UserIcon />
                     )}
