@@ -1,6 +1,6 @@
 'use client';
 
-import { getMoreProducts } from '@/app/products/[id]/actions';
+import { getMoreProducts } from '@/app/(tabs)/products/actions';
 import { useState } from 'react';
 import ProductList from './product-list';
 
@@ -17,9 +17,13 @@ type Props = {
 export default function InfinityProductList({ initialProducts }: Props) {
     const [products, setProducts] = useState(initialProducts);
     const [isLoading, setIsLoading] = useState(false);
+    const [page, setPage] = useState(0);
     const onLoadMoreProducts = async () => {
         setIsLoading(true);
-        const newProducts = await getMoreProducts(1);
+        const newProducts = await getMoreProducts(page + 1);
+        if (newProducts.length !== 0) {
+            setPage(prev => prev + 1);
+        }
         setProducts(prev => [...prev, ...newProducts]);
         setIsLoading(false);
     };
