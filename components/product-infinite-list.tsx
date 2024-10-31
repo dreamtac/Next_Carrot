@@ -81,11 +81,8 @@ export default function InfinityProductList({ initialProducts }: Props) {
             })}
             <span
                 ref={scrollTrigger}
-                style={{
-                    marginTop: `${page + 1 * 900}vh`,
-                }}
                 className={
-                    'text-sm font-semibold w-fit mx-auto rounded-lg bg-orange-500 px-3 py-1.5 hover:opacity-90 active:scale-95 mb-96'
+                    'text-sm font-semibold w-fit mx-auto rounded-lg bg-orange-500 px-3 py-1.5 hover:opacity-90 active:scale-95'
                 }
             >
                 {isLastPage ? '모든 제품을 가져왔습니다.' : isLoading ? '가져오는 중' : '더 가져오기'}
