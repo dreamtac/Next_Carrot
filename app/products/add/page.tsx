@@ -10,12 +10,13 @@ import Input from '@/components/input';
 import { PhotoIcon } from '@heroicons/react/20/solid';
 import { useState } from 'react';
 import { useFormState } from 'react-dom';
-import { uploadProduct } from './actions';
+import { getUploadUrl, uploadProduct } from './actions';
 
 export default function AddProduct() {
     const [state, action] = useFormState(uploadProduct, null);
+    const [uploadUrl, setUploadUrl] = useState('');
     const [preview, setPreview] = useState('');
-    const onImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const onImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         //업로드한 이미지 미리보기
         const {
             target: { files },
@@ -36,6 +37,11 @@ export default function AddProduct() {
         }
         const imageURL = URL.createObjectURL(file); //URL을 생성하는 api
         setPreview(imageURL);
+        const { result, success } = await getUploadUrl(); //이미지 업로드 url 가져오기 (CloudFlare)
+        if (success) {
+            const { id, uploadURL } = result;
+            setUploadUrl(uploadURL);
+        }
     };
     return (
         <div>
