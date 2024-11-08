@@ -13,9 +13,29 @@ import { useFormState } from 'react-dom';
 import { getUploadUrl, uploadProduct } from './actions';
 
 export default function AddProduct() {
-    const [state, action] = useFormState(uploadProduct, null);
     const [uploadUrl, setUploadUrl] = useState('');
     const [preview, setPreview] = useState('');
+    const [imageId, setImageId] = useState('');
+    const interceptAction = async (_: any, formData: FormData) => {
+        // upload image to cloudflare
+        const photoFile = formData.get('photo');
+        if (!photoFile) {
+            return;
+        }
+        const cloudflareForm = new FormData();
+        cloudflareForm.append('file', photoFile);
+        const response = await fetch(uploadUrl, {
+            method: 'POST',
+            body: cloudflareForm,
+        });
+        if (response.status !== 200) {
+            return;
+        }
+        const cloudflareImageUrl = `https://imagedelivery.net/kS4q9qFNzpbBU4Qo2LIh7A/${imageId}`;
+        formData.set('photo', cloudflareImageUrl); //폼 데이터의 photo 를 file -> 클라우드플레어 url로 교체 (file -> string)
+        return uploadProduct(_, formData);
+    };
+    const [state, action] = useFormState(interceptAction, null);
     const onImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         //업로드한 이미지 미리보기
         const {
@@ -40,6 +60,7 @@ export default function AddProduct() {
         const { result, success } = await getUploadUrl(); //이미지 업로드 url 가져오기 (CloudFlare)
         if (success) {
             const { id, uploadURL } = result;
+            setImageId(id);
             setUploadUrl(uploadURL);
         }
     };

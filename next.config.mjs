@@ -7,6 +7,9 @@ const nextConfig = {
                 hostname: 'avatars.githubusercontent.com',
                 port: '',
             },
+            {
+                hostname: 'imagedelivery.net',
+            },
         ],
     },
 };
