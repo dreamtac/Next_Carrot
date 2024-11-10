@@ -8,22 +8,31 @@
 import Button from '@/components/button';
 import Input from '@/components/input';
 import { PhotoIcon } from '@heroicons/react/20/solid';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
-import { useFormState } from 'react-dom';
+import { useForm } from 'react-hook-form';
 import { getUploadUrl, uploadProduct } from './actions';
+import { productSchema, ProductType } from './schema';
 
 export default function AddProduct() {
     const [uploadUrl, setUploadUrl] = useState('');
     const [preview, setPreview] = useState('');
-    const [imageId, setImageId] = useState('');
-    const interceptAction = async (_: any, formData: FormData) => {
+    const [file, setFile] = useState<File | null>(null);
+    const {
+        register,
+        handleSubmit,
+        setValue,
+        formState: { errors },
+    } = useForm<ProductType>({
+        resolver: zodResolver(productSchema),
+    });
+    const onSubmit = handleSubmit(async (data: ProductType) => {
         // upload image to cloudflare
-        const photoFile = formData.get('photo');
-        if (!photoFile) {
+        if (!file) {
             return;
         }
         const cloudflareForm = new FormData();
-        cloudflareForm.append('file', photoFile);
+        cloudflareForm.append('file', file);
         const response = await fetch(uploadUrl, {
             method: 'POST',
             body: cloudflareForm,
@@ -31,11 +40,20 @@ export default function AddProduct() {
         if (response.status !== 200) {
             return;
         }
-        const cloudflareImageUrl = `https://imagedelivery.net/kS4q9qFNzpbBU4Qo2LIh7A/${imageId}`;
-        formData.set('photo', cloudflareImageUrl); //폼 데이터의 photo 를 file -> 클라우드플레어 url로 교체 (file -> string)
-        return uploadProduct(_, formData);
+
+        const formData = new FormData();
+        formData.append('title', data.title);
+        formData.append('price', data.price.toString());
+        formData.append('description', data.description);
+        formData.append('photo', data.photo);
+        // formData.set('photo', cloudflareImageUrl); //폼 데이터의 photo 를 file -> 클라우드플레어 url로 교체 (file -> string)
+        return uploadProduct(formData);
+    });
+
+    const onValid = async () => {
+        await onSubmit();
     };
-    const [state, action] = useFormState(interceptAction, null);
+
     const onImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         //업로드한 이미지 미리보기
         const {
@@ -55,18 +73,19 @@ export default function AddProduct() {
             alert('이미지 용량은 5MB를 넘을 수 없습니다.');
             return;
         }
+        setFile(file);
         const imageURL = URL.createObjectURL(file); //URL을 생성하는 api
         setPreview(imageURL);
         const { result, success } = await getUploadUrl(); //이미지 업로드 url 가져오기 (CloudFlare)
         if (success) {
             const { id, uploadURL } = result;
-            setImageId(id);
             setUploadUrl(uploadURL);
+            setValue('photo', `https://imagedelivery.net/kS4q9qFNzpbBU4Qo2LIh7A/${id}`);
         }
     };
     return (
         <div>
-            <form action={action} className="flex flex-col gap-5 p-5">
+            <form action={onValid} className="flex flex-col gap-5 p-5">
                 <label
                     style={{ backgroundImage: `url(${preview})` }}
                     htmlFor="photo"
@@ -79,7 +98,7 @@ export default function AddProduct() {
                             <PhotoIcon className="w-20" />
                             <div className="text-neutral-400 text-sm">
                                 사진을 추가해주세요.
-                                {state?.fieldErrors.photo}
+                                {errors.photo?.message}
                             </div>
                         </>
                     ) : null}
@@ -92,14 +111,26 @@ export default function AddProduct() {
                     className="hidden"
                     accept="image/*"
                 />
-                <Input name="title" placeholder="제목" type="text" required errors={state?.fieldErrors.title} />
-                <Input name="price" placeholder="가격" type="number" required errors={state?.fieldErrors.price} />
                 <Input
-                    name="description"
+                    {...register('title')}
+                    placeholder="제목"
+                    type="text"
+                    required
+                    errors={[errors.title?.message ?? '']}
+                />
+                <Input
+                    {...register('price')}
+                    placeholder="가격"
+                    type="number"
+                    required
+                    errors={[errors.price?.message ?? '']}
+                />
+                <Input
+                    {...register('description')}
                     placeholder="제품 설명"
                     type="text"
                     required
-                    errors={state?.fieldErrors.description}
+                    errors={[errors.description?.message ?? '']}
                 />
                 <Button content="작성 완료" />
             </form>
