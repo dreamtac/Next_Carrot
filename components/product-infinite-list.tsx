@@ -42,10 +42,10 @@ export default function InfinityProductList({ initialProducts }: Props) {
                     }
                     setIsLoading(false);
                 }
-                console.log(entries[0].isIntersecting);
+                // console.log(entries[0].isIntersecting);
             },
             {
-                threshold: 1.0,
+                threshold: 0.8,
                 rootMargin: '0px 0px -100px 0px',
             }
         );

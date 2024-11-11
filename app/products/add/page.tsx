@@ -22,6 +22,7 @@ export default function AddProduct() {
         register,
         handleSubmit,
         setValue,
+        setError,
         formState: { errors },
     } = useForm<ProductType>({
         resolver: zodResolver(productSchema),
@@ -47,7 +48,10 @@ export default function AddProduct() {
         formData.append('description', data.description);
         formData.append('photo', data.photo);
         // formData.set('photo', cloudflareImageUrl); //폼 데이터의 photo 를 file -> 클라우드플레어 url로 교체 (file -> string)
-        return uploadProduct(formData);
+        const errors = await uploadProduct(formData);
+        if (errors) {
+            // setError()
+        }
     });
 
     const onValid = async () => {
