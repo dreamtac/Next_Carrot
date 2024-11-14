@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
     } else {
         //로그인이 되어있는 상태.
         if (exists) {
-            return NextResponse.redirect(`${request.nextUrl.origin}/products`);
+            return NextResponse.redirect(`${request.nextUrl.origin}/home`);
         }
     }
 }
