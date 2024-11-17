@@ -12,20 +12,10 @@ export const metadata: Metadata = {
     description: 'Sell and buy all the things',
 };
 
-export default function RootLayout({
-    children,
-    parallel, // parallel을 명시적으로 가져옵니다.
-}: {
-    children: React.ReactNode;
-    parallel: React.ReactNode; // parallel의 타입을 ReactNode로 지정.
-}) {
-    console.log('Parallel slot:', parallel);
+export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="en" className="bg-neutral-900">
-            <body className={`${inter.className} text-white max-w-screen-sm mx-auto`}>
-                {parallel}
-                {children}
-            </body>
+            <body className={`${inter.className} text-white max-w-screen-sm mx-auto`}>{children}</body>
         </html>
     );
 }
