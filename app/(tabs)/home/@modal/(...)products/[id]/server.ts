@@ -7,6 +7,14 @@ export async function getProduct(id: number) {
         where: {
             id,
         },
+        include: {
+            user: {
+                select: {
+                    username: true,
+                    avatar: true,
+                },
+            },
+        },
     });
 
     if (!product) {
