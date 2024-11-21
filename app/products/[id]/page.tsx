@@ -1,3 +1,4 @@
+import { getProduct } from '@/app/(tabs)/home/@modal/(...)products/[id]/server';
 import db from '@/lib/db';
 import { getSession } from '@/lib/session';
 import { formatToWon } from '@/lib/utils';
@@ -7,6 +8,13 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import DeleteBtn from './delete_btn';
 
+export async function generateMetadata({ params }: { params: { id: string } }) {
+    const product = await getProduct(Number(params.id));
+    return {
+        title: `${product?.title}`,
+    };
+}
+
 async function getIsOwner(userId: number) {
     // 현재 로그인된 유저가 업로드한 제품의 소유자인지 체크하는 함수
     const session = await getSession();
@@ -14,25 +22,6 @@ async function getIsOwner(userId: number) {
         return true;
     }
     return false;
-}
-
-async function getProduct(id: number) {
-    // URL파라미터로 받은 id를 가지고 db에서 해당 id와 일치하는 제품을 찾는 함수
-    const product = await db.product.findUnique({
-        where: {
-            id: id,
-        },
-        include: {
-            // 관계를 가지고 있는 테이블(user)에서 username과 avatar를 가져옴.
-            user: {
-                select: {
-                    username: true,
-                    avatar: true,
-                },
-            },
-        },
-    });
-    return product;
 }
 
 export default async function ProductDetail({ params }: { params: { id: string } }) {

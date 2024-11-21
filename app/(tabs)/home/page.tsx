@@ -12,13 +12,17 @@ async function getInitialProducts() {
             created_at: true,
             price: true,
         },
-        take: 1,
+        // take: 1,
         orderBy: {
             created_at: 'desc',
         },
     });
     return products;
 }
+
+export const metadata = {
+    title: 'Home',
+};
 
 export default async function Products() {
     const initialProducts = await getInitialProducts();
