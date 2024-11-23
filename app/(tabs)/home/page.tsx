@@ -4,7 +4,9 @@ import { PlusIcon } from '@heroicons/react/20/solid';
 import { unstable_cache as nextCache } from 'next/cache';
 import Link from 'next/link';
 
-const getCachedProducts = nextCache(getInitialProducts, ['home-products']);
+const getCachedProducts = nextCache(getInitialProducts, ['home-products'], {
+    revalidate: 60,
+});
 
 async function getInitialProducts() {
     console.log('DB_Products Hit!!');
