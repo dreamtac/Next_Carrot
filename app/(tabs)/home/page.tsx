@@ -1,9 +1,13 @@
 import InfinityProductList from '@/components/product-infinite-list';
 import db from '@/lib/db';
 import { PlusIcon } from '@heroicons/react/20/solid';
+import { unstable_cache as nextCache } from 'next/cache';
 import Link from 'next/link';
 
+const getCachedProducts = nextCache(getInitialProducts, ['home-products']);
+
 async function getInitialProducts() {
+    console.log('DB_Products Hit!!');
     const products = await db.product.findMany({
         select: {
             title: true,
@@ -25,7 +29,7 @@ export const metadata = {
 };
 
 export default async function Products() {
-    const initialProducts = await getInitialProducts();
+    const initialProducts = await getCachedProducts();
     return (
         <div className="flex flex-col p-5 gap-5">
             <InfinityProductList initialProducts={initialProducts} />
