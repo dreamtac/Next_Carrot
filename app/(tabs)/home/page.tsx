@@ -1,12 +1,10 @@
 import InfinityProductList from '@/components/product-infinite-list';
 import db from '@/lib/db';
 import { PlusIcon } from '@heroicons/react/20/solid';
-import { unstable_cache as nextCache } from 'next/cache';
+import { unstable_cache as nextCache, revalidatePath } from 'next/cache';
 import Link from 'next/link';
 
-const getCachedProducts = nextCache(getInitialProducts, ['home-products'], {
-    revalidate: 60,
-});
+const getCachedProducts = nextCache(getInitialProducts, ['home-products'], {});
 
 async function getInitialProducts() {
     console.log('DB_Products Hit!!');
@@ -32,9 +30,16 @@ export const metadata = {
 
 export default async function Products() {
     const initialProducts = await getCachedProducts();
+    const revalidate = async () => {
+        'use server';
+        revalidatePath('/home');
+    };
     return (
         <div className="flex flex-col p-5 gap-5">
             <InfinityProductList initialProducts={initialProducts} />
+            <form action={revalidate}>
+                <button>Revalidate</button>
+            </form>
             <Link
                 href={'products/add'}
                 className="flex items-center justify-center size-16 rounded-full fixed bg-orange-500 
