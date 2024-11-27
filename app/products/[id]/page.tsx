@@ -3,16 +3,34 @@ import db from '@/lib/db';
 import { getSession } from '@/lib/session';
 import { formatToWon } from '@/lib/utils';
 import { UserIcon } from '@heroicons/react/20/solid';
+import { unstable_cache as nextCache, revalidateTag } from 'next/cache';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import DeleteBtn from './delete_btn';
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
-    const product = await getProduct(Number(params.id));
+    const product = await getCachedProductTitle(Number(params.id));
     return {
         title: `${product?.title}`,
     };
+}
+
+export async function getProductTitle(id: number) {
+    console.log('DB hit - product title');
+    const product = await db.product.findUnique({
+        where: {
+            id,
+        },
+        select: {
+            title: true,
+        },
+    });
+
+    if (!product) {
+        return null;
+    }
+    return product;
 }
 
 async function getIsOwner(userId: number) {
@@ -24,13 +42,30 @@ async function getIsOwner(userId: number) {
     return false;
 }
 
+const getCachedProduct = nextCache(getProduct, ['product-detail'], {
+    tags: ['product-detail'],
+});
+
+const getCachedProductTitle = nextCache(getProductTitle, ['product-title'], {
+    tags: ['product-title'],
+});
+
+const revalidateTitle = async () => {
+    'use server';
+    revalidateTag('product-title');
+};
+const revalidateDetail = async () => {
+    'use server';
+    revalidateTag('product-detail');
+};
+
 export default async function ProductDetail({ params }: { params: { id: string } }) {
     const id = Number(params.id); //id는 숫자
     if (isNaN(id)) {
         //id에 숫자가 아닌 문자가 들어오면 NaN
         return notFound();
     }
-    const product = await getProduct(id); //db에서 가져온 product
+    const product = await getCachedProduct(id); //db에서 가져온 product
     if (!product) {
         return notFound();
     }
@@ -69,6 +104,12 @@ export default async function ProductDetail({ params }: { params: { id: string }
             </div>
             <div className="fixed w-full bottom-0 left-0 p-5 bg-neutral-800 flex justify-between items-center">
                 <span className="font-semibold text-lg">{formatToWon(product.price)} 원</span>
+                <form action={revalidateTitle}>
+                    <button>Revalidate title cache</button>
+                </form>
+                <form action={revalidateDetail}>
+                    <button>Revalidate all detail</button>
+                </form>
                 {isOwner ? (
                     <DeleteBtn productid={product.id} />
                 ) : (
