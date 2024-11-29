@@ -29,7 +29,7 @@ export const metadata = {
 };
 
 export default async function Products() {
-    const initialProducts = await getCachedProducts();
+    const initialProducts = await getInitialProducts();
     const revalidate = async () => {
         'use server';
         revalidatePath('/home');

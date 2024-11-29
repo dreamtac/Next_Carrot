@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
     };
 }
 
-export async function getProductTitle(id: number) {
+async function getProductTitle(id: number) {
     console.log('DB hit - product title');
     const product = await db.product.findUnique({
         where: {
