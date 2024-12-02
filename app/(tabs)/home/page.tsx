@@ -28,16 +28,20 @@ export const metadata = {
     title: 'Home',
 };
 
+// export const dynamic = 'force-dynamic';
+
+export const revalidate = 60;
+
 export default async function Products() {
     const initialProducts = await getInitialProducts();
-    const revalidate = async () => {
+    const revalidateList = async () => {
         'use server';
         revalidatePath('/home');
     };
     return (
         <div className="flex flex-col p-5 gap-5">
             <InfinityProductList initialProducts={initialProducts} />
-            <form action={revalidate}>
+            <form action={revalidateList}>
                 <button>Revalidate</button>
             </form>
             <Link
