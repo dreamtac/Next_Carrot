@@ -1,6 +1,5 @@
 import { getProduct } from '@/app/(tabs)/home/@modal/(...)products/[id]/server';
 import db from '@/lib/db';
-import { getSession } from '@/lib/session';
 import { formatToWon } from '@/lib/utils';
 import { UserIcon } from '@heroicons/react/20/solid';
 import { unstable_cache as nextCache, revalidateTag } from 'next/cache';
@@ -35,10 +34,10 @@ async function getProductTitle(id: number) {
 
 async function getIsOwner(userId: number) {
     // 현재 로그인된 유저가 업로드한 제품의 소유자인지 체크하는 함수
-    const session = await getSession();
-    if (session.id === userId) {
-        return true;
-    }
+    // const session = await getSession();
+    // if (session.id === userId) {
+    //     return true;
+    // }
     return false;
 }
 
@@ -120,4 +119,10 @@ export default async function ProductDetail({ params }: { params: { id: string }
             </div>
         </div>
     );
+}
+
+export async function generateStaticParams() {
+    // generateStaticParams는 배열을 리턴한다.
+    // 리턴되는 값에는 해당 페이지가 받는 파라미터 (products/[id]) 즉, id가 받을 값들을 작성해준다.
+    return [];
 }
