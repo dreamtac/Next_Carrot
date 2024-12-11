@@ -122,7 +122,14 @@ export default async function ProductDetail({ params }: { params: { id: string }
 }
 
 export async function generateStaticParams() {
-    // generateStaticParams는 배열을 리턴한다.
-    // 리턴되는 값에는 해당 페이지가 받는 파라미터 (products/[id]) 즉, id가 받을 값들을 작성해준다.
-    return [];
+    // generateStaticParams는 string타입의 배열을 리턴한다.
+    // 리턴되는 값에는 해당 페이지가 받는 파라미터 (products/[id]) 즉, id가 받을 수 있는 값들의 리스트를 작성해준다.
+    // 예를 들어, 제품db에 등록되어 있는 아이템들의 id
+    const products = await db.product.findMany({
+        select: {
+            id: true,
+        },
+    });
+    const id = products.map(product => ({ id: product.id + '' }));
+    return id;
 }
